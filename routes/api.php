@@ -28,6 +28,8 @@ Route::get('/get-roles', [UserController::class, 'getRoles']);
 Route::post('/create-or-update-user', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/get-user/{id}', [UserController::class, 'getUser']);
+Route::get('/delete-user/{id}', [UserController::class, 'delete']);
+
 
 
 
