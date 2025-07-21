@@ -4,7 +4,7 @@ use App\Http\Controllers\admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\MicrosoftController;
-
+use App\Http\Controllers\FileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +29,9 @@ Route::post('/create-or-update-user', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/get-user/{id}', [UserController::class, 'getUser']);
 Route::get('/delete-user/{id}', [UserController::class, 'delete']);
+Route::post('/file', [FileController::class, 'storeOrUpdate']);
+Route::get('/get-file/{id}', [FileController::class, 'getFile']);
+
 
 
 
