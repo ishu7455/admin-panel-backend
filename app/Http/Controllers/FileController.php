@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use App\Models\Category;
 use App\Models\SubApplicant;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class FileController extends Controller
@@ -104,101 +106,17 @@ class FileController extends Controller
     'friends_details' => 'nullable|string',
     'family_details' => 'nullable|string',
 
-    //sub
-    'sub_applicants' => 'nullable|array',
-    'sub_applicants.*.family_name' => 'nullable|string|max:255',
-    'sub_applicants.*.given_name' => 'nullable|string|max:255',
-    'sub_applicants.*.title' => 'nullable|string|max:20', // e.g., Mr, Mrs
-    'sub_applicants.*.phone_number' => 'nullable|string|max:20',
-    'sub_applicants.*.email_id' => 'nullable|email|max:255',
-    'sub_applicants.*.date_of_birth' => 'nullable|date',
-    'sub_applicants.*.gender' => 'nullable|in:Male,Female,Other',
-    'sub_applicants.*.marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
-    'sub_applicants.*.address' => 'nullable|string',
-    'sub_applicants.*.number_of_applicants' => 'nullable|integer|min:1',
-    'sub_applicants.*.country_of_residence' => 'nullable|string|max:100',
-    'sub_applicants.*.country_of_citizenship' => 'nullable|string|max:100',
-    'sub_applicants.*.status' => 'nullable|string|max:100',
 
-    // Section 2: Family Information
-    'sub_applicants.*.spouse_name' => 'nullable|string|max:255',
-    'sub_applicants.*.spouse_dob' => 'nullable|date',
-    'sub_applicants.*.have_children' => 'nullable|string',
-    'sub_applicants.*.children_details' => 'nullable|string',
-
-    // Section 3: Immigration History
-    'sub_applicants.*.applied_canada_visa' => 'nullable|string',
-    'sub_applicants.*.applied_canada_visa_details' => 'nullable|string',
-    'sub_applicants.*.refused_canada_visa' => 'nullable|boolean',
-    'sub_applicants.*.refused_canada_visa_details' => 'nullable|string',
-    'sub_applicants.*.refused_us_visa' => 'nullable|boolean',
-    'sub_applicants.*.refused_us_visa_details' => 'nullable|string',
-
-    // Section 4: Program Interest
-    'sub_applicants.*.interested_program' => 'nullable|string|max:255',
-
-    // Section 5: Education
-    'sub_applicants.*.edu_start_date' => 'nullable|date',
-    'sub_applicants.*.edu_end_date' => 'nullable|date|after_or_equal:edu_start_date',
-    'sub_applicants.*.edu_degree' => 'nullable|string|max:255',
-    'sub_applicants.*.edu_field' => 'nullable|string|max:255',
-
-    // Section 6: Employment
-    'sub_applicants.*.emp_start_date' => 'nullable|date',
-    'sub_applicants.*.emp_end_date' => 'nullable|date|after_or_equal:emp_start_date',
-    'sub_applicants.*.designation' => 'nullable|string|max:255',
-    'sub_applicants.*.emp_location' => 'nullable|string|max:255',
-    'sub_applicants.*.company_name' => 'nullable|string|max:255',
-
-    // Section 7: Financial Info
-    'sub_applicants.*.net_worth' => 'nullable|string|max:255',
-    'sub_applicants.*.income_source' => 'nullable|string|max:255',
-    'sub_applicants.*.property_value' => 'nullable|string|max:255',
-
-    // Section 8: Language Test Scores
-    'sub_applicants.*.listening_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.reading_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.writing_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.speaking_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.test_type' => 'nullable|string|max:255',
-    'sub_applicants.*.test_date' => 'nullable|date',
-
-    // Spouse Education
-    'sub_applicants.*.spouse_edu_start_date' => 'nullable|date',
-    'sub_applicants.*.spouse_edu_end_date' => 'nullable|date|after_or_equal:spouse_edu_start_date',
-    'sub_applicants.*.spouse_edu_degree' => 'nullable|string|max:255',
-    'sub_applicants.*.spouse_edu_field' => 'nullable|string|max:255',
-
-    // Spouse Employment
-    'sub_applicants.*.spouse_emp_start_date' => 'nullable|date',
-    'sub_applicants.*.spouse_emp_end_date' => 'nullable|date|after_or_equal:spouse_emp_start_date',
-    'sub_applicants.*.spouse_designation' => 'nullable|string|max:255',
-    'sub_applicants.*.spouse_location' => 'nullable|string|max:255',
-    'sub_applicants.*.spouse_company' => 'nullable|string|max:255',
-
-    // Spouse Financial
-    'sub_applicants.*.spouse_net_worth' => 'nullable|string|max:255',
-    'sub_applicants.*.spouse_income_source' => 'nullable|string|max:255',
-    'sub_applicants.*.spouse_property_value' => 'nullable|string|max:255',
-
-    // Spouse Language Test
-    'sub_applicants.*.spouse_listening_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.spouse_reading_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.spouse_writing_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.spouse_speaking_score' => 'nullable|integer|min:0|max:9',
-    'sub_applicants.*.spouse_test_type' => 'nullable|string|max:255',
-    'sub_applicants.*.spouse_test_date' => 'nullable|date',
-
-    // Section 13: Canadian Connections
-    'sub_applicants.*.have_connections' => 'nullable|boolean',
-    'sub_applicants.*.friends_details' => 'nullable|string',
-    'sub_applicants.*.family_details' => 'nullable|string',
     ]);
+    $lastApplicant = Applicant::max('external_id');
+    if(!isset($lastApplicant)){
+       $lastApplicant = 101;
+    }
 
      $applicant = Applicant::updateOrCreate(
-        ['id' => $request->id],  // if ID exists, update
+       ['id' => $mainApplicant['id'] ?? null],
         [
-            'external_id' => 76788,
+            'external_id' => isset($mainApplicant['id']) ? $mainApplicant['external_id'] : $lastApplicant + 1,
             'family_name' => $mainApplicant['family_name'],
             'given_name' => $mainApplicant['given_name'],
             'phone_number' => $mainApplicant['phone_number'],
@@ -268,9 +186,14 @@ class FileController extends Controller
     // Handle Sub Applicants (create or update without deleting old)
     if (!empty($subApplicants)) {
         foreach ($subApplicants as $sub) {
+                $lastSub = SubApplicant::max('external_id');
+                if(!isset($lastSub)){
+                  $lastSub = 101;
+                }
+
             $subAppData = [
-                'applicant_id' => $applicant->id,
-               'external_id' => '76678'.$sub['family_name'],
+            'external_id' => isset($sub['id']) ? $sub['external_id'] : $lastSub + 1,
+            'applicant_id' => $applicant->id,
             'family_name' => $sub['family_name'],
             'given_name' => $sub['given_name'],
             'phone_number' => $sub['phone_number'],
@@ -336,10 +259,8 @@ class FileController extends Controller
             ];
 
             if (!empty($sub['id'])) {
-                // update existing sub applicant
                 SubApplicant::where('id', $sub['id'])->update($subAppData);
             } else {
-                // create new sub applicant
                 SubApplicant::create($subAppData);
             }
         }
@@ -353,8 +274,18 @@ class FileController extends Controller
     }
 
     public function getFile($id){
-
        $file = Applicant::with('sub')->find($id);
-       return response()->json(['message' => 'User fetch successfully', 'user' => $file, 'status' => 200], 200);
+       return response()->json(['message' => 'File fetch successfully', 'applicant' => $file, 'status' => 200], 200);
+    }
+
+    public function getCategories(){
+        $categories = Category::where('is_active',1)->get();
+        return response()->json(['message' => 'Categories fetch successfully', 'categories' => $categories, 'status' => 200], 200);
+    }
+
+    public function getUsers(){
+        $users = User::all();
+        return response()->json(['message' => 'Categories fetch successfully', 'users' => $users, 'status' => 200], 200);
     }
 }
+
