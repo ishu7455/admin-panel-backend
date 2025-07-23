@@ -33,6 +33,10 @@ Route::post('/file', [FileController::class, 'storeOrUpdate']);
 Route::get('/get-file/{id}', [FileController::class, 'getFile']);
 Route::get('/get-files-users', [FileController::class, 'getUsers']);
 Route::get('/get-categories', [FileController::class, 'getcategories']);
+Route::get('/doc-checklists/{categoryId}', [FileController::class, 'getByCategory']);
+Route::post('/checklists/upload', [FileController::class, 'upload']);
+
+
 
 
 

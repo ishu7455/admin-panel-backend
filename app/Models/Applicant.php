@@ -9,7 +9,7 @@ class Applicant extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
-     public function sub() {
-        return $this->hasMany(SubApplicant::class);
+     public function docList() {
+        return $this->hasMany(DocumentChecklist::class);
     }
 }

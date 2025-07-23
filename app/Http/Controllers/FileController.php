@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Applicant;
 use App\Models\Category;
+use App\Models\DocumentChecklist;
 use App\Models\SubApplicant;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -186,14 +187,14 @@ class FileController extends Controller
     // Handle Sub Applicants (create or update without deleting old)
     if (!empty($subApplicants)) {
         foreach ($subApplicants as $sub) {
-                $lastSub = SubApplicant::max('external_id');
+                $lastSub = Applicant::max('external_id');
                 if(!isset($lastSub)){
                   $lastSub = 101;
                 }
 
             $subAppData = [
             'external_id' => isset($sub['id']) ? $sub['external_id'] : $lastSub + 1,
-            'applicant_id' => $applicant->id,
+            'parent_id' => $applicant->id,
             'family_name' => $sub['family_name'],
             'given_name' => $sub['given_name'],
             'phone_number' => $sub['phone_number'],
@@ -259,9 +260,9 @@ class FileController extends Controller
             ];
 
             if (!empty($sub['id'])) {
-                SubApplicant::where('id', $sub['id'])->update($subAppData);
+                Applicant::where('id', $sub['id'])->update($subAppData);
             } else {
-                SubApplicant::create($subAppData);
+                Applicant::create($subAppData);
             }
         }
     }
@@ -273,10 +274,16 @@ class FileController extends Controller
     ], 201);
     }
 
-    public function getFile($id){
-       $file = Applicant::with('sub')->find($id);
-       return response()->json(['message' => 'File fetch successfully', 'applicant' => $file, 'status' => 200], 200);
-    }
+   public function getFile($id)
+{
+    $file = Applicant::with('docList')->where(['id' => $id])->orwhere(['parent_id' => 4])->get();
+
+    return response()->json([
+        'message' => 'File fetch successfully',
+        'applicant' => $file,
+        'status' => 200
+    ]);
+}
 
     public function getCategories(){
         $categories = Category::where('is_active',1)->get();
@@ -287,5 +294,35 @@ class FileController extends Controller
         $users = User::all();
         return response()->json(['message' => 'Categories fetch successfully', 'users' => $users, 'status' => 200], 200);
     }
+
+    public function getByCategory(Request $request , $categoryId)
+    {
+        $applicantId = $request->query('applicant_id');
+        $doclists = DocumentChecklist::where('category_id', $categoryId)
+                        ->orwhere('applicant_id', $applicantId)
+                        ->get();
+        return response()->json(['message' => 'Checklist fetch successfully', 'doclists' => $doclists, 'status' => 200], 200);
+
+    }
+
+
+public function upload(Request $request)
+{
+    $request->validate([
+        'file' => 'required|file|max:10240', // Max 10MB
+        'id' => 'required',
+    ]);
+
+    $file = $request->file('file');
+    $path = $file->store('uploads/checklists', 'public'); // stored in storage/app/public/uploads/checklists
+
+    // Update the existing checklist record
+    $checklist = DocumentChecklist::findOrFail($request->doc_checklist_id);
+    $checklist->upload_path = $path;
+    $checklist->save();
+
+    return response()->json(['success' => true, 'path' => $path]);
+}
+
 }
 
