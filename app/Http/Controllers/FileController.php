@@ -276,7 +276,7 @@ class FileController extends Controller
 
    public function getFile($id)
 {
-    $file = Applicant::with('docList')->where(['id' => $id])->orwhere(['parent_id' => 4])->get();
+    $file = Applicant::with('docList')->where(['id' => $id])->orwhere(['parent_id' => $id])->get();
 
     return response()->json([
         'message' => 'File fetch successfully',
@@ -309,19 +309,56 @@ class FileController extends Controller
 public function upload(Request $request)
 {
     $request->validate([
-        'file' => 'required|file|max:10240', // Max 10MB
+        'file' => 'required|file',
         'id' => 'required',
     ]);
 
     $file = $request->file('file');
-    $path = $file->store('uploads/checklists', 'public'); // stored in storage/app/public/uploads/checklists
+    $path = $file->store('uploads/checklists', 'public');
 
-    // Update the existing checklist record
-    $checklist = DocumentChecklist::findOrFail($request->doc_checklist_id);
-    $checklist->upload_path = $path;
-    $checklist->save();
+    $docChecklist = DocumentChecklist::findOrFail($request->id);
+    $docChecklist->upload_path = $path;
+    $docChecklist->save();
 
-    return response()->json(['success' => true, 'path' => $path]);
+    return response()->json([
+        'message' => 'File uploaded successfully',
+        'doc' => [
+            'file_url' => $docChecklist->upload_path, // 👈 Return full URL for preview
+            'file_name' => $file,
+        ],
+    ]);
+}
+
+public function addMultiple(Request $request)
+{
+    $items = $request->input('items');
+    $responses = [];
+
+    foreach ($items as $index => $item) {
+        $title = $item['title'];
+        $file = $request->file("items.$index.file");
+
+        $path = $file ? $file->store('uploads/checklists', 'public') : null;
+
+        $doc = DocumentChecklist::create([
+            'title' => $title,
+            'upload_path' => $path,
+            'applicant_id' => $request->applicant_id
+        ]);
+
+        $responses[] = $doc;
+    }
+
+    return response()->json(['status' => 'success', 'updatedChecklists' => $responses]);
+}
+
+
+public function applicant(){
+    $applicants = Applicant::whereNull('parent_id')
+            ->with('subApplicants')
+            ->get();
+
+        return response()->json($applicants);
 }
 
 }

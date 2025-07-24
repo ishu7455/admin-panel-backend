@@ -12,4 +12,9 @@ class Applicant extends Model
      public function docList() {
         return $this->hasMany(DocumentChecklist::class);
     }
+
+    public function subApplicants()
+{
+    return $this->hasMany(Applicant::class, 'parent_id');
+}
 }

@@ -35,6 +35,10 @@ Route::get('/get-files-users', [FileController::class, 'getUsers']);
 Route::get('/get-categories', [FileController::class, 'getcategories']);
 Route::get('/doc-checklists/{categoryId}', [FileController::class, 'getByCategory']);
 Route::post('/checklists/upload', [FileController::class, 'upload']);
+Route::post('/checklists/add-multiple', [FileController::class, 'addMultiple']);
+Route::get('/get-applicants', [FileController::class, 'applicant']);
+
+
 
 
 

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('document_checklists', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('category_id')->nullable();
-            $table->unsignedBigInteger('file_applicant_id')->nullable();
+            $table->unsignedBigInteger('applicant_id')->nullable();
             $table->string('title');
             $table->boolean('is_custom')->default(false);
             $table->string('upload_path')->nullable();
