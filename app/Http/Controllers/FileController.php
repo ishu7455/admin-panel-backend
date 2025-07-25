@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Applicant;
 use App\Models\Category;
+use App\Models\CustomDocumentChecklist;
 use App\Models\DocumentChecklist;
 use App\Models\SubApplicant;
 use App\Models\User;
@@ -307,8 +308,11 @@ $applicant = Applicant::updateOrCreate(
     {
         $applicantId = $request->query('applicant_id');
         $doclists = DocumentChecklist::where('category_id', $categoryId)
-                        ->orwhere('applicant_id', $applicantId)
-                        ->get();
+        ->with(['docs' => function ($query) use ($applicantId) {
+            $query->where('applicant_id', $applicantId);
+        }])
+        ->get();
+                     //   ->orwhere('applicant_id', $applicantId)
         return response()->json(['message' => 'Checklist fetch successfully', 'doclists' => $doclists, 'status' => 200], 200);
 
     }
@@ -348,10 +352,11 @@ public function addMultiple(Request $request)
 
         $path = $file ? $file->store('uploads/checklists', 'public') : null;
 
-        $doc = DocumentChecklist::create([
+        $doc = CustomDocumentChecklist::create([
             'title' => $title,
             'upload_path' => $path,
-            'applicant_id' => $request->applicant_id
+            'applicant_id' => $request->applicant_id,
+            'upload_by' => Auth::user()->id
         ]);
 
         $responses[] = $doc;
@@ -360,6 +365,12 @@ public function addMultiple(Request $request)
     return response()->json(['status' => 'success', 'updatedChecklists' => $responses]);
 }
 
+ public function getCustomChecklist($applicantId)
+    {
+        $doclists = CustomDocumentChecklist::where('applicant_id', $applicantId)->get();
+        return response()->json(['message' => 'Checklist fetch successfully', 'doclists' => $doclists, 'status' => 200], 200);
+
+    }
 
 public function applicant(){
     $user = Auth::user();

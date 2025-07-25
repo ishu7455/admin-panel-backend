@@ -39,7 +39,10 @@ Route::get('/get-categories', [FileController::class, 'getcategories']);
 Route::get('/doc-checklists/{categoryId}', [FileController::class, 'getByCategory']);
 Route::post('/checklists/upload', [FileController::class, 'upload']);
 Route::post('/checklists/add-multiple', [FileController::class, 'addMultiple']);
+Route::get('/custom-doc-checklists/{applicantId}', [FileController::class, 'getCustomChecklist']);
+
 Route::get('/get-applicants', [FileController::class, 'applicant']);
+
 });
 
 
