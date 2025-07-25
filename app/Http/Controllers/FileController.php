@@ -8,6 +8,7 @@ use App\Models\DocumentChecklist;
 use App\Models\SubApplicant;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FileController extends Controller
 {
@@ -114,9 +115,8 @@ class FileController extends Controller
        $lastApplicant = 101;
     }
 
-     $applicant = Applicant::updateOrCreate(
-       ['id' => $mainApplicant['id'] ?? null],
-        [
+
+            $data = [
             'external_id' => isset($mainApplicant['id']) ? $mainApplicant['external_id'] : $lastApplicant + 1,
             'family_name' => $mainApplicant['family_name'],
             'given_name' => $mainApplicant['given_name'],
@@ -180,10 +180,18 @@ class FileController extends Controller
             'have_connections' => $mainApplicant['have_connections'],
             'friends_details' => $mainApplicant['friends_details'],
            'family_details' => $mainApplicant['family_details'],
+            ];
+  $user = Auth::user();
+if (in_array($user->role_id, [1, 2])) {
+    $data['assign_by'] = $user->id;
+    $data['assign_to'] = $mainApplicant['assign_to'];
+}
 
-        ]
-    );
-
+// Now create or update
+$applicant = Applicant::updateOrCreate(
+    ['id' => $mainApplicant['id'] ?? null],
+    $data
+);
     // Handle Sub Applicants (create or update without deleting old)
     if (!empty($subApplicants)) {
         foreach ($subApplicants as $sub) {
@@ -291,7 +299,7 @@ class FileController extends Controller
     }
 
     public function getUsers(){
-        $users = User::all();
+        $users = User::whereNotIn('role_id', [1, 2])->get();
         return response()->json(['message' => 'Categories fetch successfully', 'users' => $users, 'status' => 200], 200);
     }
 
@@ -323,7 +331,7 @@ public function upload(Request $request)
     return response()->json([
         'message' => 'File uploaded successfully',
         'doc' => [
-            'file_url' => $docChecklist->upload_path, // 👈 Return full URL for preview
+            'file_url' => $docChecklist->upload_path,
             'file_name' => $file,
         ],
     ]);
@@ -354,9 +362,18 @@ public function addMultiple(Request $request)
 
 
 public function applicant(){
-    $applicants = Applicant::whereNull('parent_id')
+    $user = Auth::user();
+
+    if (in_array($user->role_id, [1, 2])) {
+        $applicants = Applicant::whereNull('parent_id')
             ->with('subApplicants')
             ->get();
+    } else {
+        $applicants = Applicant::whereNull('parent_id')
+            ->where('assign_to', $user->id)
+            ->with('subApplicants')
+            ->get();
+    }
 
         return response()->json($applicants);
 }

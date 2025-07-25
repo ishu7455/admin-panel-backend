@@ -24,6 +24,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/auth/microsoft/redirect', [MicrosoftController::class, 'redirect']);
 Route::get('/auth/microsoft/callback', [MicrosoftController::class, 'callback']);
+
+Route::middleware('auth:api')->group(function () {
+
 Route::get('/get-roles', [UserController::class, 'getRoles']);
 Route::post('/create-or-update-user', [UserController::class, 'store']);
 Route::get('/users', [UserController::class, 'index']);
@@ -37,6 +40,8 @@ Route::get('/doc-checklists/{categoryId}', [FileController::class, 'getByCategor
 Route::post('/checklists/upload', [FileController::class, 'upload']);
 Route::post('/checklists/add-multiple', [FileController::class, 'addMultiple']);
 Route::get('/get-applicants', [FileController::class, 'applicant']);
+});
+
 
 
 
