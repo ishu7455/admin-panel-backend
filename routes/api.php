@@ -4,6 +4,7 @@ use App\Http\Controllers\admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\MicrosoftController;
+use App\Http\Controllers\CheckListController;
 use App\Http\Controllers\FileController;
 
 /*
@@ -38,10 +39,12 @@ Route::get('/get-files-users', [FileController::class, 'getUsers']);
 Route::get('/get-categories', [FileController::class, 'getcategories']);
 Route::get('/doc-checklists/{categoryId}', [FileController::class, 'getByCategory']);
 Route::post('/checklists/upload', [FileController::class, 'upload']);
+Route::post('/checklists/update-custom', [FileController::class, 'updateCustom']);
 Route::post('/checklists/add-multiple', [FileController::class, 'addMultiple']);
 Route::get('/custom-doc-checklists/{applicantId}', [FileController::class, 'getCustomChecklist']);
-
 Route::get('/get-applicants', [FileController::class, 'applicant']);
+Route::delete('/checklists/custom-delete/{id}', [FileController::class, 'destroyCustomDoc']);
+Route::get('/custom-checklists/{applicantId}', [CheckListController::class, 'getCustomChecklist']);
 
 });
 

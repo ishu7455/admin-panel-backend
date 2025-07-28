@@ -28,9 +28,8 @@ class MicrosoftController extends Controller
         ], 404);
     }
 
-    Auth::login($user); // Log in the user
+    Auth::login($user);
 
-    // Generate Passport token
     $tokenResult = $user->createToken('Microsoft-Login');
     $token = $tokenResult->accessToken;
 

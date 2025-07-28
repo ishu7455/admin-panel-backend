@@ -6,10 +6,12 @@ use App\Models\Applicant;
 use App\Models\Category;
 use App\Models\CustomDocumentChecklist;
 use App\Models\DocumentChecklist;
-use App\Models\SubApplicant;
+use App\Models\UploadCheckList;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 class FileController extends Controller
 {
@@ -307,6 +309,7 @@ $applicant = Applicant::updateOrCreate(
     public function getByCategory(Request $request , $categoryId)
     {
         $applicantId = $request->query('applicant_id');
+        // $doclists = DocumentChecklist::where('category_id', $categoryId)->get();
         $doclists = DocumentChecklist::where('category_id', $categoryId)
         ->with(['docs' => function ($query) use ($applicantId) {
             $query->where('applicant_id', $applicantId);
@@ -320,6 +323,7 @@ $applicant = Applicant::updateOrCreate(
 
 public function upload(Request $request)
 {
+   // return $request->all();
     $request->validate([
         'file' => 'required|file',
         'id' => 'required',
@@ -328,8 +332,21 @@ public function upload(Request $request)
     $file = $request->file('file');
     $path = $file->store('uploads/checklists', 'public');
 
-    $docChecklist = DocumentChecklist::findOrFail($request->id);
+   $docChecklist = UploadCheckList::updateOrCreate(
+    [
+        'doc_id' => $request->id,
+        'applicant_id' => $request->applicantId,
+    ],
+    [
+        'upload_path' => $path,
+    ]
+);
+
     $docChecklist->upload_path = $path;
+    $docChecklist->doc_id = $request->id;
+    $docChecklist->applicant_id =  $request->applicantId;
+    $docChecklist->upload_by = Auth::user()->id;
+
     $docChecklist->save();
 
     return response()->json([
@@ -341,6 +358,27 @@ public function upload(Request $request)
     ]);
 }
 
+public function updateCustom(Request $request)
+{
+    $request->validate([
+        'file' => 'required|file',
+        'id' => 'required',
+    ]);
+
+    $file = $request->file('file');
+    $path = $file->store('uploads/checklists', 'public');
+
+  CustomDocumentChecklist::where(['id' => $request->id])->update(['upload_path' => $path]);
+
+
+    return response()->json([
+        'message' => 'File uploaded successfully',
+        'doc' => [
+            'file_url' => $path,
+            'file_name' => $file,
+        ],
+    ]);
+}
 public function addMultiple(Request $request)
 {
     $items = $request->input('items');
@@ -389,5 +427,21 @@ public function applicant(){
         return response()->json($applicants);
 }
 
+public function destroyCustomDoc($id)
+{
+    $doc = CustomDocumentChecklist::find($id);
+
+    if (!$doc) {
+        return response()->json(['message' => 'Document not found'], 404);
+    }
+
+    if ($doc->upload_path && Storage::disk('public')->exists($doc->upload_path)) {
+        Storage::disk('public')->delete($doc->upload_path);
+    }
+
+    $doc->delete();
+
+    return response()->json(['message' => 'Document deleted successfully']);
+}
 }
 
