@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\MicrosoftController;
 use App\Http\Controllers\CheckListController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\NoteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,15 @@ Route::get('/custom-doc-checklists/{applicantId}', [FileController::class, 'getC
 Route::get('/get-applicants', [FileController::class, 'applicant']);
 Route::delete('/checklists/custom-delete/{id}', [FileController::class, 'destroyCustomDoc']);
 Route::get('/custom-checklists/{applicantId}', [CheckListController::class, 'getCustomChecklist']);
+Route::post('/checklists/custom-toggle-status/{id}', [ChecklistController::class, 'toggleStatus']);
+Route::post('/checklists/add-multiple-checklist', [ChecklistController::class, 'addMultiple']);
+Route::delete('/checklists/custom-list-delete/{id}', [ChecklistController::class, 'destroyCustomDoc']);
+Route::get('/checklists/{categoryId}', [ChecklistController::class, 'getByCategory']);
+Route::post('/checklists/toggle-status', [ChecklistController::class, 'UpdateChecklistStatus']);
+Route::post('/notes/add-multiple-notes', [NoteController::class, 'addMultiple']);
+
+
+
 
 });
 
