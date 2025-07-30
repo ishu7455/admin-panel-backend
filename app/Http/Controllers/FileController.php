@@ -6,11 +6,14 @@ use App\Models\Applicant;
 use App\Models\Category;
 use App\Models\CustomDocumentChecklist;
 use App\Models\DocumentChecklist;
+use App\Models\HistoryLog;
 use App\Models\UploadCheckList;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\helpers\helpers;
+
 
 
 class FileController extends Controller
@@ -195,6 +198,12 @@ $applicant = Applicant::updateOrCreate(
     ['id' => $mainApplicant['id'] ?? null],
     $data
 );
+
+if(!empty($mainApplicant['id'])){
+   logHistory($mainApplicant['id'], 'File Updated');
+}else{
+   logHistory($applicant['id'], 'File Added');
+}
     // Handle Sub Applicants (create or update without deleting old)
     if (!empty($subApplicants)) {
         foreach ($subApplicants as $sub) {

@@ -55,6 +55,11 @@ Route::post('/notes/add-multiple-notes', [NoteController::class, 'addMultiple'])
 
 
 
+Route::get('/notes', [NoteController::class, 'index']);
+Route::get('/history', [NoteController::class, 'history']);
+
+Route::put('/notes/{id}', [NoteController::class, 'update']);
+Route::delete('/notes/{id}', [NoteController::class, 'destroy']);
 
 });
 
