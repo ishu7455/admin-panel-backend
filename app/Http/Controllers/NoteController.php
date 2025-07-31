@@ -24,6 +24,7 @@ class NoteController extends Controller
         ]);
 
         $responses[] = $doc;
+        logHistory($request->applicant_id, 'Note Added' , $doc['id'] , null ,null);
     }
 
     return response()->json(['status' => 'success', 'updatedChecklists' => $responses]);
@@ -43,6 +44,8 @@ public function update($id , Request $request)
     }
 
     Note::where('id',$id)->update(['text' => $request->note , 'added_by' => Auth::user()->id]);
+     logHistory($note['applicant_id'], 'Note Updated' , $note['id'] , null ,null);
+
     return response()->json(['status' => 'success','note'=>$note]);
 }
 public function destroy($id)
@@ -53,6 +56,8 @@ public function destroy($id)
         return response()->json(['message' => 'Document not found'], 404);
     }
 
+    logHistory($note['applicant_id'], 'Note Deleted' , $note['id'] , null ,null);
+
     $note->delete();
 
     return response()->json(['message' => 'Document deleted successfully']);
@@ -61,16 +66,25 @@ public function destroy($id)
 public function history(Request $request){
     $history = HistoryLog::with('users')->where('applicant_id', $request->applicant_id)->get();
 
-     $history = HistoryLog::with('users')
+     $history = HistoryLog::with(['users','notes','customDoc','customCheck'])
         ->where('applicant_id', $request->applicant_id)
         ->get()
         ->map(function ($item) {
+             $additionalId = null;
+                if ($item->notes) {
+                    $additionalId = $item->notes->id;
+                } elseif ($item->customDoc) {
+                    $additionalId = $item->customDoc->id;
+                } elseif ($item->customCheck) {
+                    $additionalId = $item->customCheck->id;
+                }
             return [
                 'id' => $item->id,
                 'message' => $item->message,
                 'created_at' => Carbon::parse($item->created_at)->format('d F, Y'),
                 'in_days' => Carbon::parse($item->created_at)->diffForHumans() ?? null,
                 'changed_by' => $item->users->first_name ?? null,
+                'additional' => $additionalId ?? null
             ];
         });
     return response()->json(['status' => 'success','history'=>$history]);

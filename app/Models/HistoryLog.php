@@ -15,4 +15,17 @@ class HistoryLog extends Model
 
     }
 
+     public function notes(){
+            return $this->belongsTo(Note::class, 'note_id');
+
+    }
+
+     public function customDoc(){
+            return $this->belongsTo(CustomDocumentChecklist::class, 'custom_doc_id');
+    }
+
+    public function customCheck(){
+            return $this->belongsTo(CustomChecklist::class, 'custom_check_id');
+    }
+
 }

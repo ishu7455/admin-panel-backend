@@ -200,9 +200,9 @@ $applicant = Applicant::updateOrCreate(
 );
 
 if(!empty($mainApplicant['id'])){
-   logHistory($mainApplicant['id'], 'File Updated');
+   logHistory($mainApplicant['id'], 'File Updated' , null);
 }else{
-   logHistory($applicant['id'], 'File Added');
+   logHistory($applicant['id'], 'File Added' , null);
 }
     // Handle Sub Applicants (create or update without deleting old)
     if (!empty($subApplicants)) {
@@ -377,8 +377,13 @@ public function updateCustom(Request $request)
     $file = $request->file('file');
     $path = $file->store('uploads/checklists', 'public');
 
-  CustomDocumentChecklist::where(['id' => $request->id])->update(['upload_path' => $path]);
+  $doc = CustomDocumentChecklist::find($request->id);
 
+if ($doc) {
+    $doc->update(['upload_path' => $path]);
+
+    logHistory($doc->applicant_id, 'Custom Document Updated', null, $request->id);
+}
 
     return response()->json([
         'message' => 'File uploaded successfully',
@@ -405,7 +410,7 @@ public function addMultiple(Request $request)
             'applicant_id' => $request->applicant_id,
             'upload_by' => Auth::user()->id
         ]);
-
+       logHistory($doc['applicant_id'], 'Custom Document Added', null, $doc['id']);
         $responses[] = $doc;
     }
 
@@ -419,22 +424,23 @@ public function addMultiple(Request $request)
 
     }
 
-public function applicant(){
+public function applicant(Request $request)
+{
     $user = Auth::user();
 
-    if (in_array($user->role_id, [1, 2])) {
-        $applicants = Applicant::whereNull('parent_id')
-            ->with('subApplicants')
-            ->get();
-    } else {
-        $applicants = Applicant::whereNull('parent_id')
-            ->where('assign_to', $user->id)
-            ->with('subApplicants')
-            ->get();
+    $query = Applicant::whereNull('parent_id')
+        ->with('subApplicants');
+
+    if (!in_array($user->role_id, [1, 2])) {
+        $query->where('assign_to', $user->id);
     }
 
-        return response()->json($applicants);
+    $perPage = $request->input('per_page', 10);
+    $applicants = $query->paginate($perPage);
+
+    return response()->json($applicants);
 }
+
 
 public function destroyCustomDoc($id)
 {
@@ -447,10 +453,40 @@ public function destroyCustomDoc($id)
     if ($doc->upload_path && Storage::disk('public')->exists($doc->upload_path)) {
         Storage::disk('public')->delete($doc->upload_path);
     }
-
+   logHistory($doc->applicant_id, 'Custom Document Deleted', null, $id);
     $doc->delete();
 
     return response()->json(['message' => 'Document deleted successfully']);
+}
+
+public function download($id)
+{
+    $doc = CustomDocumentChecklist::find($id);
+
+    if (!$doc || !$doc->upload_path ) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'File not found.'
+        ], 404);
+    }
+
+        return Storage::disk('public')->download($doc->upload_path);
+
+}
+
+public function downloadDoc($id)
+{
+    $doc = UploadCheckList::find($id);
+
+    if (!$doc || !$doc->upload_path ) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'File not found.'
+        ], 404);
+    }
+
+        return Storage::disk('public')->download($doc->upload_path);
+
 }
 }
 

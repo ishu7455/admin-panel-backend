@@ -26,6 +26,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/auth/microsoft/redirect', [MicrosoftController::class, 'redirect']);
 Route::get('/auth/microsoft/callback', [MicrosoftController::class, 'callback']);
+Route::get('/doc/download/{id}', [FileController::class, 'download']);
+Route::get('/doc-by-cat/download/{id}', [FileController::class, 'downloadDoc']);
+
+
 
 Route::middleware('auth:api')->group(function () {
 

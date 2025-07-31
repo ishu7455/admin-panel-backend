@@ -22,6 +22,7 @@ class CheckListController extends Controller
     $checklist = CustomChecklist::findOrFail($id);
     $checklist->status = $request->status;
     $checklist->save();
+     logHistory($checklist->applicant_id, 'Custom CheckList Status Update', null, null , $id);
 
     return response()->json(['message' => 'Status updated successfully']);
 }
@@ -40,7 +41,7 @@ public function addMultiple(Request $request)
             'applicant_id' => $request->applicant_id,
             'added_by' => Auth::user()->id
         ]);
-
+     logHistory($doc['applicant_id'], 'Custom CheckList Added', null, null , $doc['id']);
         $responses[] = $doc;
     }
 
@@ -54,6 +55,9 @@ public function destroyCustomDoc($id)
     if (!$doc) {
         return response()->json(['message' => 'Document not found'], 404);
     }
+
+         logHistory($doc->applicant_id, 'Custom CheckList Deleted', null, null , $id);
+
 
     $doc->delete();
 
