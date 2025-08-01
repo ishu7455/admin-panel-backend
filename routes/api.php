@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\Dashboard;
 use App\Http\Controllers\admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,7 @@ Route::put('/notes/{id}', [NoteController::class, 'update']);
 Route::delete('/notes/{id}', [NoteController::class, 'destroy']);
 
 });
+Route::get('/applicant-stats', [Dashboard::class, 'applicantStats']);
 
 
 

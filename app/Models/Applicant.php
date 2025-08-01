@@ -14,7 +14,17 @@ class Applicant extends Model
     }
 
     public function subApplicants()
-{
-    return $this->hasMany(Applicant::class, 'parent_id');
-}
+    {
+      return $this->hasMany(Applicant::class, 'parent_id');
+    }
+
+    public function assignToUser() {
+      return $this->belongsTo(User::class, 'assign_to');
+    }
+    public function assignByUser() {
+      return $this->belongsTo(User::class, 'assign_by');
+    }
+    public function program() {
+      return $this->belongsTo(Category::class, 'interested_program');
+    }
 }
