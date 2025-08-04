@@ -11,45 +11,52 @@ use Carbon\Carbon;
 
 class Dashboard extends Controller
 {
-public function applicantStats()
+public function applicantStats(Request $request)
 {
-    $filter = $request->query('filter', 'all');
-    $now = Carbon::now();
 
-    switch ($filter) {
-        case 'weekly':
-            $data = Applicant::select(DB::raw("WEEK(created_at, 1) as label"), DB::raw("count(*) as total"))
-                ->whereMonth('created_at', $now->month)
-                ->whereYear('created_at', $now->year)
-                ->groupBy('label')
-                ->orderBy('label')
-                ->get();
-            break;
+    $filter = $request->query('filter', 'year'); // default year
+    $year = $request->query('year', now()->year);
 
-        case 'monthly':
-            $data = Applicant::select(DB::raw("MONTH(created_at) as label"), DB::raw("count(*) as total"))
-                ->whereYear('created_at', $now->year)
-                ->groupBy('label')
-                ->orderBy('label')
-                ->get();
-            break;
-
-        case 'yearly':
-            $data = Applicant::select(DB::raw("YEAR(created_at) as label"), DB::raw("count(*) as total"))
-                ->groupBy('label')
-                ->orderBy('label')
-                ->get();
-            break;
-
-        default:
-            $data = Applicant::select(DB::raw("DATE(created_at) as label"), DB::raw("count(*) as total"))
-                ->whereDate('created_at', $now->toDateString())
-                ->groupBy('label')
-                ->get();
-            break;
+    if ($filter === 'year') {
+        $data = DB::table('applicants')
+            ->select(DB::raw('YEAR(created_at) as label'), DB::raw('COUNT(*) as count'))
+            ->groupBy('label')
+            ->orderBy('label')
+            ->get();
+    } elseif ($filter === 'month') {
+        $data = DB::table('applicants')
+            ->select(DB::raw('MONTH(created_at) as label'), DB::raw('COUNT(*) as count'))
+            ->whereYear('created_at', $year)
+            ->groupBy('label')
+            ->orderBy('label')
+            ->get()
+            ->map(function ($item) {
+                $item->label = Carbon::create()->month($item->label)->format('M');
+                return $item;
+            });
+    } elseif ($filter === 'week') {
+        $data = DB::table('applicants')
+            ->select(DB::raw('DAYNAME(created_at) as label'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [
+                now()->startOfWeek(), now()->endOfWeek()
+            ])
+            ->groupBy('label')
+            ->orderByRaw("FIELD(label, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')")
+            ->get();
+    } else {
+        return response()->json(['message' => 'Invalid filter'], 400);
     }
 
     return response()->json($data);
 }
 
+public function statusCount(){
+    $data['total'] = Applicant::count();
+    $data['totalNew'] = Applicant::where('status','New')->count();
+    $data['totalInProcess'] = Applicant::where('status','In Process')->count();
+    $data['totalFinalReview'] = Applicant::where('status','Final Review')->count();
+    $data['totalCompleted'] = Applicant::where('status','Completed')->count();
+    $data['totalPendingDocumentRequest'] = Applicant::where('status','Pending Document Request')->count();
+    return response()->json($data);
+}
 }
