@@ -43,7 +43,10 @@ public function update($id , Request $request)
         return response()->json(['message' => 'Note not found'], 404);
     }
 
-    Note::where('id',$id)->update(['text' => $request->note , 'added_by' => Auth::user()->id]);
+     $note->update([
+        'text' => $request->note,
+        'added_by' => Auth::user()->id
+    ]);
      logHistory($note['applicant_id'], 'Note Updated' , $note['id'] , null ,null);
 
     return response()->json(['status' => 'success','note'=>$note]);
@@ -82,9 +85,13 @@ public function history(Request $request){
                 'id' => $item->id,
                 'message' => $item->message,
                 'created_at' => Carbon::parse($item->created_at)->format('d F, Y'),
+                'time' => Carbon::parse($item->created_at)->format('h:i A'),
                 'in_days' => Carbon::parse($item->created_at)->diffForHumans() ?? null,
                 'changed_by' => $item->users->first_name ?? null,
-                'additional' => $additionalId ?? null
+                'additional' => $additionalId ?? null,
+                'old' => in_array($item->message, ['update']) ? $item->old : null,
+                'new' => in_array($item->message, ['update']) ? $item->new : null,
+
             ];
         });
     return response()->json(['status' => 'success','history'=>$history]);

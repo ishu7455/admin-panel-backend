@@ -25,97 +25,6 @@ class FileController extends Controller
     $mainApplicant = $data[0];
 
     $subApplicants = array_slice($data, 1);
-
-    $validated = $request->validate([
-    'family_name' => 'nullable|string|max:255',
-    'given_name' => 'nullable|string|max:255',
-    'phone_number' => 'nullable|string|max:20',
-    'email_id' => 'nullable|email|max:255',
-    'date_of_birth' => 'nullable|date',
-    'gender' => 'nullable|in:Male,Female,Other',
-    'marital_status' => 'nullable|in:Single,Married,Divorced,Widowed',
-    'address' => 'nullable|string',
-    'number_of_applicants' => 'nullable|integer|min:1',
-    'country_of_residence' => 'nullable|string|max:100',
-    'country_of_citizenship' => 'nullable|string|max:100',
-    'status' => 'nullable|string|max:100',
-
-    // Section 2: Family Information
-    'spouse_name' => 'nullable|string|max:255',
-    'spouse_dob' => 'nullable|date',
-    'have_children' => 'nullable|string',
-    'children_details' => 'nullable|string',
-
-    // Section 3: Immigration History
-    'applied_canada_visa' => 'nullable|string',
-    'applied_canada_visa_details' => 'nullable|string',
-    'refused_canada_visa' => 'nullable|boolean',
-    'refused_canada_visa_details' => 'nullable|string',
-    'refused_us_visa' => 'nullable|boolean',
-    'refused_us_visa_details' => 'nullable|string',
-
-    // Section 4: Program Interest
-    'interested_program' => 'nullable|string|max:255',
-
-    // Section 5: Education
-    'edu_start_date' => 'nullable|date',
-    'edu_end_date' => 'nullable|date|after_or_equal:edu_start_date',
-    'edu_degree' => 'nullable|string|max:255',
-    'edu_field' => 'nullable|string|max:255',
-
-    // Section 6: Employment
-    'emp_start_date' => 'nullable|date',
-    'emp_end_date' => 'nullable|date|after_or_equal:emp_start_date',
-    'designation' => 'nullable|string|max:255',
-    'emp_location' => 'nullable|string|max:255',
-    'company_name' => 'nullable|string|max:255',
-
-    // Section 7: Financial Info
-    'net_worth' => 'nullable|string|max:255',
-    'income_source' => 'nullable|string|max:255',
-    'property_value' => 'nullable|string|max:255',
-
-    // Section 8: Language Test Scores
-    'listening_score' => 'nullable|integer|min:0|max:9',
-    'reading_score' => 'nullable|integer|min:0|max:9',
-    'writing_score' => 'nullable|integer|min:0|max:9',
-    'speaking_score' => 'nullable|integer|min:0|max:9',
-    'test_type' => 'nullable|string|max:255',
-    'test_date' => 'nullable|date',
-
-    // Spouse Education
-    'spouse_edu_start_date' => 'nullable|date',
-    'spouse_edu_end_date' => 'nullable|date|after_or_equal:spouse_edu_start_date',
-    'spouse_edu_degree' => 'nullable|string|max:255',
-    'spouse_edu_field' => 'nullable|string|max:255',
-
-    // Spouse Employment
-    'spouse_emp_start_date' => 'nullable|date',
-    'spouse_emp_end_date' => 'nullable|date|after_or_equal:spouse_emp_start_date',
-    'spouse_designation' => 'nullable|string|max:255',
-    'spouse_location' => 'nullable|string|max:255',
-    'spouse_company' => 'nullable|string|max:255',
-
-    // Spouse Financial
-    'spouse_net_worth' => 'nullable|string|max:255',
-    'spouse_income_source' => 'nullable|string|max:255',
-    'spouse_property_value' => 'nullable|string|max:255',
-
-    // Spouse Language Test
-    'spouse_listening_score' => 'nullable|integer|min:0|max:9',
-    'spouse_reading_score' => 'nullable|integer|min:0|max:9',
-    'spouse_writing_score' => 'nullable|integer|min:0|max:9',
-    'spouse_speaking_score' => 'nullable|integer|min:0|max:9',
-    'spouse_test_type' => 'nullable|string|max:255',
-    'spouse_test_date' => 'nullable|date',
-
-    // Section 13: Canadian Connections
-    'have_connections' => 'nullable|boolean',
-    'friends_details' => 'nullable|string',
-    'family_details' => 'nullable|string',
-
-
-    ]);
     $lastApplicant = Applicant::max('external_id');
     if(!isset($lastApplicant)){
        $lastApplicant = 101;
@@ -199,11 +108,11 @@ $applicant = Applicant::updateOrCreate(
     $data
 );
 
-if(!empty($mainApplicant['id'])){
-   logHistory($mainApplicant['id'], 'File Updated' , null);
-}else{
-   logHistory($applicant['id'], 'File Added' , null);
-}
+// if(!empty($mainApplicant['id'])){
+//    logHistory($mainApplicant['id'], 'File Updated' , null);
+// }else{
+//    logHistory($applicant['id'], 'File Added' , null);
+// }
     // Handle Sub Applicants (create or update without deleting old)
     if (!empty($subApplicants)) {
         foreach ($subApplicants as $sub) {
@@ -281,12 +190,14 @@ if(!empty($mainApplicant['id'])){
 
             if (!empty($sub['id'])) {
                 Applicant::where('id', $sub['id'])->update($subAppData);
+              //  logHistory($sub['id'], 'File Updated' , null);
             } else {
                 Applicant::create($subAppData);
+                //logHistory($subAppData['id'], 'Sub Applicant Added' , null);
             }
         }
     }
-
+    logHistory();
 
     return response()->json([
         'message' => $request->id ? 'File updated successfully' : 'File created successfully',

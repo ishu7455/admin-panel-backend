@@ -95,12 +95,13 @@ public function destroyCustomDoc($id)
     ]
 );
 
-    $docChecklist->status = $request->status;
     $docChecklist->list_id = $request->id;
     $docChecklist->applicant_id =  $request->applicantId;
     $docChecklist->update_by = Auth::user()->id;
-
+    $docChecklist->status = $request->status;
     $docChecklist->save();
+
+    logHistory(null , "Update Status");
 
     return response()->json([
         'message' => 'File uploaded successfully',

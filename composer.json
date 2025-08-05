@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.21",
         "laravel/tinker": "^2.8",
+        "owen-it/laravel-auditing": "^13.7",
         "socialiteproviders/microsoft": "^4.7"
     },
     "require-dev": {
