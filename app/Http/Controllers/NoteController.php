@@ -31,7 +31,7 @@ class NoteController extends Controller
 }
 
 public function index(Request $request){
-    $notes = Note::where('applicant_id', $request->applicant_id)->get();
+    $notes = Note::with('users')->where('applicant_id', $request->applicant_id)->get();
     return response()->json(['status' => 'success','notes'=>$notes]);
 }
 

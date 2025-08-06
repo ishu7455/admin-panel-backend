@@ -14,4 +14,9 @@ class Note extends Model implements Auditable
       protected $auditExclude = ['updated_at'];
     protected $guarded = ['id'];
 
+  public function users(){
+    return $this->hasMany(User::class,'id','added_by');
+}
+
+
 }

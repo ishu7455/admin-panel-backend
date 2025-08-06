@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AddCheckList;
+use App\Models\Category;
 use App\Models\CheckList;
 use App\Models\CustomChecklist;
 use Illuminate\Http\Request;
@@ -72,8 +73,10 @@ public function destroyCustomDoc($id)
             $query->where('applicant_id', $applicantId);
         }])
         ->get();
+
+        $cat = Category::where('id',$categoryId)->value('name');
                      //   ->orwhere('applicant_id', $applicantId)
-        return response()->json(['message' => 'Checklist fetch successfully', 'doclists' => $doclists, 'status' => 200], 200);
+        return response()->json(['message' => 'Checklist fetch successfully', 'doclists' => $doclists, 'cat' => $cat ,'status' => 200], 200);
 
     }
 

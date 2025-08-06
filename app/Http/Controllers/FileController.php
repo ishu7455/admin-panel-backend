@@ -274,6 +274,7 @@ public function upload(Request $request)
         'doc' => [
             'file_url' => $docChecklist->upload_path,
             'file_name' => $file,
+             'id' => $docChecklist->id
         ],
     ]);
 }

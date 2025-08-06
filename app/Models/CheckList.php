@@ -16,6 +16,9 @@ class CheckList extends Model implements Auditable
     public function docs(){
         return $this->hasMany(AddCheckList::class,'list_id');
     }
+     public function category(){
+        return $this->hasMany(Category::class,'category_id');
+    }
 
 
 }
