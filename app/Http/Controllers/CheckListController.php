@@ -68,10 +68,15 @@ public function destroyCustomDoc($id)
     {
         $applicantId = $request->query('applicant_id');
         // $doclists = DocumentChecklist::where('category_id', $categoryId)->get();
-        $doclists = CheckList::where('category_id', $categoryId)
-        ->with(['docs' => function ($query) use ($applicantId) {
-            $query->where('applicant_id', $applicantId);
-        }])
+         $doclists = CheckList::where('category_id', $categoryId)
+        ->with([
+            'docs' => function ($query) use ($applicantId) {
+                $query->where('applicant_id', $applicantId);
+            },
+            'headings' => function ($query) use ($categoryId) {
+                $query->where('category_id', $categoryId);
+            }
+        ])
         ->get();
 
         $cat = Category::where('id',$categoryId)->value('name');

@@ -33,6 +33,7 @@ class FileController extends Controller
 
             $data = [
             'external_id' => isset($mainApplicant['id']) ? $mainApplicant['external_id'] : $lastApplicant + 1,
+            'program_subtype' =>  $mainApplicant['family_name'] ?? null,
             'family_name' => $mainApplicant['family_name'] ?? null,
             'given_name' => $mainApplicant['given_name'] ?? null,
             'phone_number' => $mainApplicant['phone_number'] ?? null,
@@ -124,6 +125,7 @@ $applicant = Applicant::updateOrCreate(
             $subAppData = [
             'external_id' => isset($sub['id']) ? $sub['external_id'] : $lastSub + 1,
             'parent_id' => $applicant->id,
+            'program_subtype' => $sub['program_subtype'] ?? null,
             'family_name' => $sub['family_name'] ?? null,
             'given_name' => $sub['given_name'] ?? null,
             'phone_number' => $sub['phone_number'] ?? null,
@@ -142,7 +144,7 @@ $applicant = Applicant::updateOrCreate(
             'children_details' => $sub['children_details'] ?? null,
             'applied_canada_visa' => $sub['applied_canada_visa'] ?? null,
             'applied_canada_visa_details' => $sub['applied_canada_visa_details'] ?? null,
-            'refused_canada_visa' => $sub['refused_canada_visa'],
+            'refused_canada_visa' => $sub['refused_canada_visa'] ?? null,
             'refused_canada_visa_details' => $sub['refused_canada_visa_details'] ?? null,
             'refused_us_visa' => $sub['refused_us_visa'] ?? null,
             'refused_us_visa_details' => $sub['refused_us_visa_details'] ?? null,
@@ -233,7 +235,9 @@ $applicant = Applicant::updateOrCreate(
         $doclists = DocumentChecklist::where('category_id', $categoryId)
         ->with(['docs' => function ($query) use ($applicantId) {
             $query->where('applicant_id', $applicantId);
-        }])
+        },  'headings' => function ($query) use ($categoryId) {
+                $query->where('category_id', $categoryId);
+            }])
         ->get();
                      //   ->orwhere('applicant_id', $applicantId)
         return response()->json(['message' => 'Checklist fetch successfully', 'doclists' => $doclists, 'status' => 200], 200);

@@ -14,4 +14,8 @@ class DocumentChecklist extends Model
         return $this->hasMany(UploadCheckList::class,'doc_id');
     }
 
+     public function headings(){
+        return $this->hasMany(DocumentHeading::class,'id','heading_id');
+    }
+
 }
