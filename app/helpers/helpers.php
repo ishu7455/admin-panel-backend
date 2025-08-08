@@ -15,7 +15,7 @@ if ($audit) {
     $new = $audit->new_values;
     if($applicantId == null){
         $applicantId = $audit->auditable_id;
-        $message = "File " .$audit->event;
+        $message = $audit->event;
     }
         HistoryLog::create([
             'applicant_id' => $applicantId,

@@ -190,16 +190,19 @@ $applicant = Applicant::updateOrCreate(
            'family_details' => $sub['family_details'] ?? null,
             ];
 
-            if (!empty($sub['id'])) {
-                Applicant::where('id', $sub['id'])->update($subAppData);
-              //  logHistory($sub['id'], 'File Updated' , null);
-            } else {
-                Applicant::create($subAppData);
-                //logHistory($subAppData['id'], 'Sub Applicant Added' , null);
-            }
+           if (!empty($sub['id'])) {
+    $subApplicant = Applicant::find($sub['id']);
+    if ($subApplicant) {
+        $subApplicant->fill($subAppData);
+        $subApplicant->save(); // This will trigger auditing
+    }
+} else {
+    Applicant::create($subAppData);
+}
+
         }
     }
-    logHistory();
+   // logHistory();
 
     return response()->json([
         'message' => $request->id ? 'File updated successfully' : 'File created successfully',
