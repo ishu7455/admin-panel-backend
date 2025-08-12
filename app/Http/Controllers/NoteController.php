@@ -108,12 +108,10 @@ public function history(Request $request)
     $query = Audit::orderByDesc('created_at')->with(['user', 'auditable']);
 
     $query->where(function ($q) use ($applicantId) {
-        // अगर खुद Applicant model है
         $q->where(function ($sub) use ($applicantId) {
             $sub->where('auditable_type', 'App\Models\Applicant')
                 ->where('auditable_id', $applicantId);
         })
-        // बाकी morph relations
         ->orWhereHasMorph(
             'auditable',
             [
@@ -128,7 +126,7 @@ public function history(Request $request)
             }
         );
     });
-
+  // return $query->get();
     $history = $query->get()->map(function ($item) {
         $modelName = class_basename($item->auditable_type);
         $message = $modelName . ' ' . $item->event;
@@ -140,17 +138,19 @@ public function history(Request $request)
             if($modelName == 'Note'){
             $mainText = "Note";
             }elseif($modelName == 'CustomChecklist'){
-             $mainText = "Custom CheckList";
+             $mainText = "Note";
             }elseif($modelName == 'AddCheckList'){
              $mainText = "Check List";
             }elseif($modelName == 'UploadCheckList'){
              $mainText = "Doument";
-            }elseif($modelName == 'CustomDocumentChecklist'){
+            }elseif($modelName == 'CustomDocumentChecklist' ){
              $mainText = "Custom Document Checklist";
             }
 
             if ($display) {
-                $message = $mainText . ' (' . $display . ') ' . $item->event;
+                $message = $mainText .' ' . '<strong>' .  $display  . '</strong>' . ' '.$item->event;
+
+
             }
         }
 
@@ -163,8 +163,8 @@ public function history(Request $request)
             'changed_by' => $item->user
                 ? trim(($item->user->first_name ?? '') . ' ' . ($item->user->last_name ?? ''))
                 : 'Unknown',
-            'old'        => $item->event === 'updated' ? json_encode($item->old_values) : null,
-            'new'        => $item->event === 'updated' ? json_encode($item->new_values) : null,
+            'old'        => $item->event === 'updated' && $modelName == 'Applicant' ? json_encode($item->old_values) : null,
+            'new'        => $item->event === 'updated' && $modelName == 'Applicant' ? json_encode($item->new_values) : null,
           //  'new1'       => $item->event === 'created'
               //  ? ($item->new_values['title'] ?? null)
               //  : null,
