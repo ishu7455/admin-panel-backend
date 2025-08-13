@@ -96,6 +96,80 @@ class FileController extends Controller
             'have_connections' => $mainApplicant['have_connections'] ?? null,
             'friends_details' => $mainApplicant['friends_details'] ?? null,
            'family_details' => $mainApplicant['family_details'] ?? null,
+
+            'other_legal_name'         => $mainApplicant['other_legal_name'] ?? null,
+                'status_current_country'   => $mainApplicant['status_current_country'] ?? null,
+
+                'other_country_stay' => json_encode([
+                    'name'   => $mainApplicant['other_country_name'] ?? null,
+                    'status' => $mainApplicant['other_country_status_1'] ?? null,
+                    'other'  => $mainApplicant['other_country_other_1'] ?? null,
+                    'from'   => $mainApplicant['other_country_from_1'] ?? null,
+                    'to'     => $mainApplicant['other_country_to_1'] ?? null,
+                ]),
+
+                'previous_relationship' => json_encode([
+                    'partner_name'      => $mainApplicant['previous_partner_name'] ?? null,
+                    'relationship_type' => $mainApplicant['previous_relationship_type'] ?? null,
+                    'start_date'        => $mainApplicant['previous_relationship_start_date'] ?? null,
+                    'end_date'          => $mainApplicant['previous_relationship_end_date'] ?? null,
+                ]),
+
+                'inviter_details' => json_encode([
+                    'name'         => $mainApplicant['inviter_name'] ?? null,
+                    'address'      => $mainApplicant['inviter_address'] ?? null,
+                    'relationship' => $mainApplicant['inviter_relationship'] ?? null,
+                ]),
+
+                'statutory_questions' => json_encode([
+                    'q1'  => $mainApplicant['statutory_question_1'] ?? null,
+                    'q2'  => $mainApplicant['statutory_question_2'] ?? null,
+                    'q3'  => $mainApplicant['statutory_question_3'] ?? null,
+                    'q4'  => $mainApplicant['statutory_question_4'] ?? null,
+                    'q5'  => $mainApplicant['statutory_question_5'] ?? null,
+                    'q6'  => $mainApplicant['statutory_question_6'] ?? null,
+                    'q7'  => $mainApplicant['statutory_question_7'] ?? null,
+                    'q8'  => $mainApplicant['statutory_question_8'] ?? null,
+                    'q9'  => $mainApplicant['statutory_question_9'] ?? null,
+                    'q10' => $mainApplicant['statutory_question_10'] ?? null,
+                    'q11' => $mainApplicant['statutory_question_11'] ?? null,
+                    'q12' => $mainApplicant['statutory_question_12'] ?? null,
+                    'q13' => $mainApplicant['statutory_question_13'] ?? null,
+                    'q14' => $mainApplicant['statutory_question_14'] ?? null,
+                    'q15' => $mainApplicant['statutory_question_15'] ?? null,
+                ]),
+
+                'family_information' => json_encode([
+                'mother' => [
+                    'name'            => $mainApplicant['mother_name'] ?? null,
+                    'marital_status'  => $mainApplicant['mother_marital_status'] ?? null,
+                    'dob'              => $mainApplicant['mother_dob'] ?? null,
+                    'city_birth'      => $mainApplicant['mother_city_birth'] ?? null,
+                    'country_birth'   => $mainApplicant['mother_country_birth'] ?? null,
+                    'present_address' => $mainApplicant['mother_present_address'] ?? null,
+                ],
+                'father' => [
+                    'name'            => $mainApplicant['father_name'] ?? null,
+                    'marital_status'  => $mainApplicant['father_marital_status'] ?? null,
+                    'dob'              => $mainApplicant['father_dob'] ?? null,
+                    'country_birth'   => $mainApplicant['father_country_birth'] ?? null,
+                    'address'         => $mainApplicant['father_address'] ?? null,
+                    'email'           => $mainApplicant['father_email'] ?? null,
+                ],
+                'child' => [
+                    'name'            => $mainApplicant['child_name'] ?? null,
+                    'marital_status'  => $mainApplicant['child_marital_status'] ?? null,
+                    'dob'              => $mainApplicant['child_dob'] ?? null,
+                    'country_birth'   => $mainApplicant['child_country_birth'] ?? null,
+                    'present_address' => $mainApplicant['child_present_address'] ?? null,
+                    'email'           => $mainApplicant['child_email'] ?? null,
+                    'occupation'      => $mainApplicant['child_occupation'] ?? null,
+                ]
+            ]),
+
+            'purpose_visit' => $mainApplicant['purpose_visit'] ?? null,
+            'marriage_date' => $mainApplicant['marriage_date'] ?? null,
+            'relationship_start_date' => $mainApplicant['relationship_start_date'] ?? null,
             ];
   $user = Auth::user();
 if (in_array($user->role_id, [1, 2])) {
@@ -188,6 +262,82 @@ $applicant = Applicant::updateOrCreate(
             'have_connections' => $sub['have_connections'] ?? null,
             'friends_details' => $sub['friends_details'] ?? null,
            'family_details' => $sub['family_details'] ?? null,
+
+
+                'other_legal_name'         => $sub['other_legal_name'] ?? null,
+                'status_current_country'   => $sub['status_current_country'] ?? null,
+
+                'other_country_stay' => json_encode([
+                    'name'   => $sub['other_country_name'] ?? null,
+                    'status' => $sub['other_country_status_1'] ?? null,
+                    'other'  => $sub['other_country_other_1'] ?? null,
+                    'from'   => $sub['other_country_from_1'] ?? null,
+                    'to'     => $sub['other_country_to_1'] ?? null,
+                ]),
+
+                'previous_relationship' => json_encode([
+                    'partner_name'      => $sub['previous_partner_name'] ?? null,
+                    'relationship_type' => $sub['previous_relationship_type'] ?? null,
+                    'start_date'        => $sub['previous_relationship_start_date'] ?? null,
+                    'end_date'          => $sub['previous_relationship_end_date'] ?? null,
+                ]),
+
+                'inviter_details' => json_encode([
+                    'name'         => $sub['inviter_name'] ?? null,
+                    'address'      => $sub['inviter_address'] ?? null,
+                    'relationship' => $sub['inviter_relationship'] ?? null,
+                ]),
+
+                'statutory_questions' => json_encode([
+                    'q1'  => $sub['statutory_question_1'] ?? null,
+                    'q2'  => $sub['statutory_question_2'] ?? null,
+                    'q3'  => $sub['statutory_question_3'] ?? null,
+                    'q4'  => $sub['statutory_question_4'] ?? null,
+                    'q5'  => $sub['statutory_question_5'] ?? null,
+                    'q6'  => $sub['statutory_question_6'] ?? null,
+                    'q7'  => $sub['statutory_question_7'] ?? null,
+                    'q8'  => $sub['statutory_question_8'] ?? null,
+                    'q9'  => $sub['statutory_question_9'] ?? null,
+                    'q10' => $sub['statutory_question_10'] ?? null,
+                    'q11' => $sub['statutory_question_11'] ?? null,
+                    'q12' => $sub['statutory_question_12'] ?? null,
+                    'q13' => $sub['statutory_question_13'] ?? null,
+                    'q14' => $sub['statutory_question_14'] ?? null,
+                    'q15' => $sub['statutory_question_15'] ?? null,
+                ]),
+
+                'family_information' => json_encode([
+                'mother' => [
+                    'name'            => $sub['mother_name'] ?? null,
+                    'marital_status'  => $sub['mother_marital_status'] ?? null,
+                    'dob'              => $sub['mother_dob'] ?? null,
+                    'city_birth'      => $sub['mother_city_birth'] ?? null,
+                    'country_birth'   => $sub['mother_country_birth'] ?? null,
+                    'present_address' => $sub['mother_present_address'] ?? null,
+                ],
+                'father' => [
+                    'name'            => $sub['father_name'] ?? null,
+                    'marital_status'  => $sub['father_marital_status'] ?? null,
+                    'dob'              => $sub['father_dob'] ?? null,
+                    'country_birth'   => $sub['father_country_birth'] ?? null,
+                    'address'         => $sub['father_address'] ?? null,
+                    'email'           => $sub['father_email'] ?? null,
+                ],
+                'child' => [
+                    'name'            => $sub['child_name'] ?? null,
+                    'marital_status'  => $sub['child_marital_status'] ?? null,
+                    'dob'              => $sub['child_dob'] ?? null,
+                    'country_birth'   => $sub['child_country_birth'] ?? null,
+                    'present_address' => $sub['child_present_address'] ?? null,
+                    'email'           => $sub['child_email'] ?? null,
+                    'occupation'      => $sub['child_occupation'] ?? null,
+                ]
+            ]),
+
+
+            'purpose_visit' => $sub['purpose_visit'] ?? null,
+            'marriage_date' => $sub['marriage_date'] ?? null,
+            'relationship_start_date' => $sub['relationship_start_date'] ?? null,
             ];
 
            if (!empty($sub['id'])) {
