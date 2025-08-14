@@ -15,7 +15,7 @@ class Note extends Model implements Auditable
     protected $guarded = ['id'];
 
   public function users(){
-    return $this->hasMany(User::class,'id','added_by');
+    return $this->hasOne(User::class,'id','added_by');
 }
 
 

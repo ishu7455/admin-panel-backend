@@ -14,12 +14,13 @@ class Dashboard extends Controller
 public function applicantStats(Request $request)
 {
 
-    $filter = $request->query('filter', 'year'); // default year
+    $filter = $request->query('filter', 'month'); // default year
     $year = $request->query('year', now()->year);
 
     if ($filter === 'year') {
         $data = DB::table('applicants')
             ->select(DB::raw('YEAR(created_at) as label'), DB::raw('COUNT(*) as count'))
+           ->orWhere('status',$request->status)
             ->groupBy('label')
             ->orderBy('label')
             ->get();
@@ -27,6 +28,7 @@ public function applicantStats(Request $request)
         $data = DB::table('applicants')
             ->select(DB::raw('MONTH(created_at) as label'), DB::raw('COUNT(*) as count'))
             ->whereYear('created_at', $year)
+             ->orWhere('status',$request->status)
             ->groupBy('label')
             ->orderBy('label')
             ->get()
@@ -40,6 +42,7 @@ public function applicantStats(Request $request)
             ->whereBetween('created_at', [
                 now()->startOfWeek(), now()->endOfWeek()
             ])
+            ->orWhere('status',$request->status)
             ->groupBy('label')
             ->orderByRaw("FIELD(label, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')")
             ->get();

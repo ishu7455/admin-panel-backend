@@ -57,10 +57,14 @@ public function destroyCustomDoc($id)
         return response()->json(['message' => 'Document not found'], 404);
     }
 
-         logHistory($doc->applicant_id, 'Custom CheckList Deleted', null, null , $id);
+        // logHistory($doc->applicant_id, 'Custom CheckList Deleted', null, null , $id);
+        $doc->update([
+        'delete_status' => 0,
+        'title' => $doc->title,
+        'added_by' => Auth::user()->id
+    ]);
 
-
-    $doc->delete();
+   // $doc->delete();
 
     return response()->json(['message' => 'Document deleted successfully']);
 }
@@ -85,38 +89,33 @@ public function destroyCustomDoc($id)
 
     }
 
-    public function UpdateChecklistStatus(Request $request)
+   public function UpdateChecklistStatus(Request $request)
 {
-   // return $request->all();
     $request->validate([
-        'id' => 'required',
+        'id'          => 'required|integer',
+        'status'      => 'required|string',
+        'applicantId' => 'nullable|integer',
     ]);
 
+    $docChecklist = AddCheckList::updateOrCreate(
+        [
+            'list_id'      => $request->id,
+            'applicant_id' => $request->applicantId,
+        ],
+        [
+            'status'     => $request->status,
+            'update_by'  => Auth::id(),
+        ]
+    );
 
-   $docChecklist = AddCheckList::updateOrCreate(
-    [
-        'list_id' => $request->id,
-        'applicant_id' => $request->applicantId,
-    ],
-    [
-        'status' => $request->status,
-    ]
-);
-
-    $docChecklist->list_id = $request->id;
-    $docChecklist->applicant_id =  $request->applicantId;
-    $docChecklist->update_by = Auth::user()->id;
-    $docChecklist->status = $request->status;
-    $docChecklist->save();
-
-    logHistory(null , "Update Status");
+    logHistory(null, "Update Status");
 
     return response()->json([
-        'message' => 'File uploaded successfully',
+        'message' => 'Checklist status updated successfully',
         'doc' => [
-            'file_url' => $docChecklist->status,
-
+            'status' => $docChecklist->status,
         ],
     ]);
 }
+
 }

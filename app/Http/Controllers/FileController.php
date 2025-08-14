@@ -397,44 +397,40 @@ $applicant = Applicant::updateOrCreate(
 
     }
 
-
 public function upload(Request $request)
 {
-   // return $request->all();
     $request->validate([
         'file' => 'required|file',
         'id' => 'required',
+        'applicantId' => 'nullable|integer', // validate applicant ID if needed
     ]);
 
     $file = $request->file('file');
+
+    // Store file in 'storage/app/public/uploads/checklists'
     $path = $file->store('uploads/checklists', 'public');
 
-   $docChecklist = UploadCheckList::updateOrCreate(
-    [
-        'doc_id' => $request->id,
-        'applicant_id' => $request->applicantId,
-    ],
-    [
-        'upload_path' => $path,
-    ]
-);
-
-    $docChecklist->upload_path = $path;
-    $docChecklist->doc_id = $request->id;
-    $docChecklist->applicant_id =  $request->applicantId;
-    $docChecklist->upload_by = Auth::user()->id;
-
-    $docChecklist->save();
+    $docChecklist = UploadCheckList::updateOrCreate(
+        [
+            'doc_id' => $request->id,
+            'applicant_id' => $request->applicantId,
+        ],
+        [
+            'upload_path' => $path,
+            'upload_by' => Auth::id(),
+        ]
+    );
 
     return response()->json([
         'message' => 'File uploaded successfully',
         'doc' => [
-            'file_url' => $docChecklist->upload_path,
-            'file_name' => $file,
-             'id' => $docChecklist->id
+            'file_url'  => asset('storage/'.$docChecklist->upload_path),
+            'file_name' => $file->getClientOriginalName(),
+            'id'        => $docChecklist->id
         ],
     ]);
 }
+
 
 public function updateCustom(Request $request)
 {
@@ -526,8 +522,13 @@ public function destroyCustomDoc($id)
     if ($doc->upload_path && Storage::disk('public')->exists($doc->upload_path)) {
         Storage::disk('public')->delete($doc->upload_path);
     }
-   logHistory($doc->applicant_id, 'Custom Document Deleted', null, $id);
-    $doc->delete();
+  // logHistory($doc->applicant_id, 'Custom Document Deleted', null, $id);
+    $doc->update([
+        'delete_status' => 0,
+        'title' => $doc->title,
+        'upload_by' => Auth::user()->id
+    ]);
+   // $doc->delete();
 
     return response()->json(['message' => 'Document deleted successfully']);
 }

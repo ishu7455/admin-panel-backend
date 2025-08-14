@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Audit;
+use App\Models\CheckList;
+use App\Models\DocumentChecklist;
 use App\Models\HistoryLog;
 use App\Models\Note;
 use Carbon\Carbon;
@@ -23,16 +25,18 @@ class NoteController extends Controller
             'applicant_id' => $request->applicant_id,
             'added_by' => Auth::user()->id
         ]);
+         $doc->load('users');
 
         $responses[] = $doc;
-        logHistory($request->applicant_id, 'Note Added' , $doc['id'] , null ,null);
+
+    //    logHistory($request->applicant_id, 'Note Added' , $doc['id'] , null ,null);
     }
 
     return response()->json(['status' => 'success', 'updatedChecklists' => $responses]);
 }
 
 public function index(Request $request){
-    $notes = Note::with('users')->where('applicant_id', $request->applicant_id)->get();
+    $notes = Note::with('users')->where(['applicant_id' => $request->applicant_id , 'delete_status' =>1])->get();
     return response()->json(['status' => 'success','notes'=>$notes]);
 }
 
@@ -60,9 +64,13 @@ public function destroy($id)
         return response()->json(['message' => 'Document not found'], 404);
     }
 
-    logHistory($note['applicant_id'], 'Note Deleted' , $note['id'] , null ,null);
+ //   logHistory($note['applicant_id'], 'Note Deleted' , $note['id'] , null ,null);
 
-    $note->delete();
+     $note->update([
+        'delete_status' => 0,
+        'text' => $note->text,
+        'added_by' => Auth::user()->id
+    ]);
 
     return response()->json(['message' => 'Document deleted successfully']);
 }
@@ -132,13 +140,36 @@ public function history(Request $request)
         $message = $modelName . ' ' . $item->event;
 
         if ($item->auditable) {
-            $display = $item->auditable->title
-                ?? $item->auditable->name
-                ?? null;
+           $display = null;
+
+foreach (['title', 'name', 'text'] as $field) {
+    if (isset($item->auditable->$field) && !is_array($item->auditable->$field)) {
+        $display = $item->auditable->$field;
+        break;
+    }
+}
+
+if(isset($item->auditable->doc_id)){
+  $display = DocumentChecklist::where('id',$item->auditable->doc_id)->value('title');
+}
+
+if(isset($item->auditable->list_id)){
+  $display = CheckList::where('id',$item->auditable->list_id)->value('title');
+   $item->event = "updated";
+}
+
+
+$newValues = (object) $item->new_values;
+if (isset($newValues->delete_status) && $newValues->delete_status === 0) {
+    $ev = "deleted";
+}else{
+     $ev = $item->event;
+}
+
             if($modelName == 'Note'){
             $mainText = "Note";
             }elseif($modelName == 'CustomChecklist'){
-             $mainText = "Note";
+             $mainText = "Custom Check List";
             }elseif($modelName == 'AddCheckList'){
              $mainText = "Check List";
             }elseif($modelName == 'UploadCheckList'){
@@ -147,11 +178,16 @@ public function history(Request $request)
              $mainText = "Custom Document Checklist";
             }
 
-            if ($display) {
-                $message = $mainText .' ' . '<strong>' .  $display  . '</strong>' . ' '.$item->event;
+          if ($display) {
+            $count = strlen($display);
 
+    if ($count > 20) {
+        $display = substr($display, 0, 100) . '...';
+    }
 
-            }
+    $message = $mainText . ' ' . '<strong>' . $display . '</strong>' . ' ' . $ev;
+}
+
         }
 
         return [
