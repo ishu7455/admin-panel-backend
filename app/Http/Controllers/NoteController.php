@@ -7,6 +7,7 @@ use App\Models\CheckList;
 use App\Models\DocumentChecklist;
 use App\Models\HistoryLog;
 use App\Models\Note;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -190,6 +191,26 @@ if (isset($newValues->delete_status) && $newValues->delete_status === 0) {
 
         }
 
+     if (isset($item->new_values['assign_to'])) {
+    $oldValues = $item->old_values; // now a plain array
+    $newValues = $item->new_values;
+
+    $oldId = $oldValues['assign_to'] ?? null;
+    $newId = $newValues['assign_to'] ?? null;
+
+    $oldName = $oldId ? User::where('id', $oldId)->value('first_name') : null;
+    $newName = $newId ? User::where('id', $newId)->value('first_name') : null;
+
+    // update the array
+    $oldValues['assign_to'] = $oldName;
+    $newValues['assign_to'] = $newName;
+
+    // assign back
+    $item->old_values = $oldValues;
+    $item->new_values = $newValues;
+}
+
+
         return [
             'id'         => $item->id,
             'message'    => $message,
@@ -199,6 +220,7 @@ if (isset($newValues->delete_status) && $newValues->delete_status === 0) {
             'changed_by' => $item->user
                 ? trim(($item->user->first_name ?? '') . ' ' . ($item->user->last_name ?? ''))
                 : 'Unknown',
+
             'old'        => $item->event === 'updated' && $modelName == 'Applicant' ? json_encode($item->old_values) : null,
             'new'        => $item->event === 'updated' && $modelName == 'Applicant' ? json_encode($item->new_values) : null,
           //  'new1'       => $item->event === 'created'

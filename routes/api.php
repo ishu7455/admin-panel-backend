@@ -66,6 +66,10 @@ Route::get('/history', [NoteController::class, 'history']);
 Route::put('/notes/{id}', [NoteController::class, 'update']);
 Route::delete('/notes/{id}', [NoteController::class, 'destroy']);
 Route::get('/applicant-status', [Dashboard::class, 'statusCount']);
+Route::get('/status-update/{status}/{id}', [Dashboard::class, 'updateStatus']);
+Route::get('/assigness-update/{assignee}/{id}', [Dashboard::class, 'updateAssigness']);
+
+
 
 
 });

@@ -169,7 +169,13 @@ class FileController extends Controller
 
             'purpose_visit' => $mainApplicant['purpose_visit'] ?? null,
             'marriage_date' => $mainApplicant['marriage_date'] ?? null,
-            'relationship_start_date' => $mainApplicant['relationship_start_date'] ?? null,
+            'biometrics' => $mainApplicant['biometrics'] ?? null,
+            'application_fees' => $mainApplicant['application_fees'] ?? null,
+            'col_app_fees' => $mainApplicant['col_app_fees'] ?? null,
+            'agent_name' => $mainApplicant['agent_name'] ?? null,
+            'agent_amount' => $mainApplicant['agent_amount'] ?? null,
+            'application_fees' => $mainApplicant['tution_fees'] ?? null,
+
             ];
   $user = Auth::user();
 if (in_array($user->role_id, [1, 2])) {
@@ -338,6 +344,12 @@ $applicant = Applicant::updateOrCreate(
             'purpose_visit' => $sub['purpose_visit'] ?? null,
             'marriage_date' => $sub['marriage_date'] ?? null,
             'relationship_start_date' => $sub['relationship_start_date'] ?? null,
+             'biometrics' => $sub['biometrics'] ?? null,
+            'application_fees' => $sub['application_fees'] ?? null,
+            'col_app_fees' => $sub['col_app_fees'] ?? null,
+            'agent_name' => $sub['agent_name'] ?? null,
+            'agent_amount' => $sub['agent_amount'] ?? null,
+            'application_fees' => $sub['tution_fees'] ?? null,
             ];
 
            if (!empty($sub['id'])) {
